@@ -51,7 +51,7 @@ plot2 <- ggplot(pheno, aes_string(x = "TA", y = "tibia")) +
 plot2
 
 #Scatterplot for pheno without outliers
-plot3 <- ggplot(pheno_out_rm, aes_string(x = "TA", y = "tibia")) +
+plot3 <- ggplot(pheno_ro, aes_string(x = "TA", y = "tibia")) +
   geom_point() +
   geom_abline(color = "blue", intercept = coef(lm2)[1], slope = coef(lm2)[2]) +
   theme_cowplot()
