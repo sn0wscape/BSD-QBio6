@@ -96,3 +96,24 @@ plot6 <- ggplot(pheno2, aes_string(x = "FCbox", y = "AvToneD3")) +
 plot6
 ```
 **The distribution of AvToneD3 values isn't normal before using logit function. However transformation with logit yields distribution of values closer to normal. The type of apparatus used to perform the tone measurements seems to affect the results to some degree**
+
+
+## Part B
+
+```{r Part B}
+plot7 <- ggplot(pheno, aes_string(x = "BMD")) +
+  geom_histogram() +
+  theme_cowplot()
+
+plot7
+
+hmdp <- read.csv("hmdp.csv", stringsAsFactors = FALSE)
+hmdp$femur_convert <- hmdp$femur * 1000
+plot8 <- ggplot() +
+  geom_histogram(data = pheno, mapping = aes_string(x = "BMD"), binwidth = 5, fill = "slateblue", alpha = .4) +
+  geom_histogram(data = hmdp, mapping = aes_string(x = "femur_convert"), bindwidth = 5, fill = "red3", alpha = .4) +
+  theme_cowplot()
+
+plot8
+```
+
