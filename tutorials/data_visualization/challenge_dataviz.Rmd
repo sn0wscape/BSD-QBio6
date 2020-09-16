@@ -1,0 +1,98 @@
+---
+title: "Dataviz challenge - Dan Krochmal"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part A
+
+```{r load libraries and files}
+library(ggplot2)
+library(cowplot)
+library(tidyverse)
+source("readpheno.R")
+```
+
+```{r part A.1}
+
+#Generate histogram
+plot1 <- ggplot(pheno, aes_string(x = "TA")) +
+  geom_histogram(binwidth = 5) + 
+  theme_cowplot()
+plot1
+
+#Count outliers
+TA.cutoffs <- quantile(pheno$TA, na.rm = T, probs = c(.25, .75)) + c(-1.5, 1.5) * IQR(pheno$TA, na.rm = T)
+filter(pheno, TA < TA.cutoffs[1] | TA > TA.cutoffs[2]) %>%
+  pull(TA) %>%
+  sort %>%
+  length
+```
+
+**The distribution is roughly normal. There are some unusually small values. Based on IQR rule there are 28 outliers**
+
+```{r Part A.2}
+#Create a pheno subset with removed outliers
+pheno_ro <- subset(pheno, TA > TA.cutoffs[1] & TA < TA.cutoffs[2])
+
+#Calculate linear regression coefficients for pheno with and without outliers
+lm1 <- lm(tibia ~ TA, pheno)
+lm2 <- lm(tibia ~ TA, pheno_ro)
+
+#Scatter plot for pheno with outliers
+plot2 <- ggplot(pheno, aes_string(x = "TA", y = "tibia")) +
+  geom_point() +
+  geom_abline(color = "blue", intercept = coef(lm1)[1], slope = coef(lm1)[2]) +
+  theme_cowplot()
+
+plot2
+
+#Scatterplot for pheno without outliers
+plot3 <- ggplot(pheno_out_rm, aes_string(x = "TA", y = "tibia")) +
+  geom_point() +
+  geom_abline(color = "blue", intercept = coef(lm2)[1], slope = coef(lm2)[2]) +
+  theme_cowplot()
+
+plot3
+
+print(lm1)
+print(lm2)
+```
+**The mass of the TA muscle seems to be increasing with the tibia length. Outliers don't seem to affect the output coefficients of linear regression**
+
+```{r Part A.3}
+
+#Generate histogram of AvToneD3 values
+plot4 <- ggplot(pheno, aes_string(x = "AvToneD3")) +
+  geom_histogram() + #The distribution is not normal
+  theme_cowplot()
+
+plot4
+
+#Creating a backup of the pheno dataset
+pheno2 <- pheno
+
+#Defining logit
+logit <- function(x) log((x + 0.001) / (1 - x + 0.001))
+
+#Convert values with logit
+pheno2$AvToneD3 <- logit(pheno2$AvToneD3)
+
+#Re-do the plot4 histogram with converted values
+plot5 <- ggplot(pheno2, aes_string(x = "AvToneD3")) +
+  geom_histogram() +
+  theme_cowplot()
+
+plot5
+
+#Generate boxplot
+plot6 <- ggplot(pheno2, aes_string(x = "FCbox", y = "AvToneD3")) +
+  geom_boxplot() +
+  theme_cowplot()
+
+plot6
+```
+**The distribution of AvToneD3 values isn't normal before using logit function. However transformation with logit yields distribution of values closer to normal. The type of apparatus used to perform the tone measurements seems to affect the results to some degree**
