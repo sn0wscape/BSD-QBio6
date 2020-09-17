@@ -152,7 +152,7 @@ axis <- gwscan_2 %>%
 ```{r Part C.1 manhattan plot}
 ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
   geom_point(aes(color = as.factor(chr), alpha = 0.75)) +
-  scale_color_manual(values = rep(c("midnightblue", "slateblue"), 22)) +
+  scale_color_manual(values = rep(c("dodgerblue4", "dodgerblue2"), 19)) +
   
   scale_x_continuous(label = axis$chr, breaks = axis$center) +
   theme_cowplot() +
@@ -161,7 +161,7 @@ ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
       panel.border = element_blank(),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
-      axis.text.x = element_text(angle = 90, vjust = 0.5),
+      axis.text.x = element_text(angle = 270, vjust = 0.5),
       axis.ticks.x = element_blank()
     ) +
   labs(
