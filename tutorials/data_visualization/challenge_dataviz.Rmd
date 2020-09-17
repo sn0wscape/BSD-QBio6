@@ -109,11 +109,65 @@ plot7
 
 hmdp <- read.csv("hmdp.csv", stringsAsFactors = FALSE)
 hmdp$femur_convert <- hmdp$femur * 1000
+
 plot8 <- ggplot() +
   geom_histogram(data = pheno, mapping = aes_string(x = "BMD"), binwidth = 5, fill = "slateblue", alpha = .4) +
   geom_histogram(data = hmdp, mapping = aes_string(x = "femur_convert"), bindwidth = 5, fill = "red3", alpha = .4) +
+  #legend("topright", c("Germany", "Plastic"), col = c("slateblue", "red3"), lwd=10) +
+  labs(
+    title = "BMD distribution in CFW vs HMDP mice",
+    x = "Bone-mineral density (mg/cm2)",
+    y = "Count"
+  ) +
   theme_cowplot()
 
 plot8
 ```
+
+## Part C
+
+```{r Part C.1 prepare dataframe}
+gwscan <- read.csv("gwscan.csv", stringsAsFactors = FALSE)
+
+#Compute chr size
+gwscan_2 <- gwscan %>%
+  group_by(chr) %>%
+  summarise(chr_len = max(pos)) %>%
+  
+  # start pos for each chr in the cumulative coordinates
+  mutate(start_cum = cumsum(as.numeric(chr_len))-as.numeric(chr_len)) %>%
+  select(-chr_len) %>%
+  left_join(gwscan, ., by = 'chr') %>% # add this info to original df
+            
+  # position of SNP in the cumkulative coordinates
+  arrange(chr,pos) %>%
+  mutate(pos_cum = pos + start_cum)
+
+axis <- gwscan_2 %>%
+  group_by(chr) %>%
+  summarize(center = (max(pos_cum) + min(pos_cum) ) / 2 )
+
+```
+
+```{r Part C.1 manhattan plot}
+ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
+  geom_point(aes(color = as.factor(chr), alpha = 0.75)) +
+  scale_color_manual(values = rep(c("midnightblue", "slateblue"), 22)) +
+  
+  scale_x_continuous(label = axis$chr, breaks = axis$center) +
+  theme_cowplot() +
+  theme( 
+      legend.position="none",
+      panel.border = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      axis.text.x = element_text(angle = 90, vjust = 0.5),
+      axis.ticks.x = element_blank()
+    ) +
+  labs(
+    x = "Chromosome",
+    y = "-log10(P)"
+  )
+```
+
 
