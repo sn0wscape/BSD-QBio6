@@ -162,12 +162,50 @@ ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
       axis.text.x = element_text(angle = 270, vjust = 0.5),
-      axis.ticks.x = element_blank()
+      axis.ticks.x = element_blank(),
+      axis.line.x = element_blank()
     ) +
   labs(
     x = "Chromosome",
     y = "-log10(P)"
   )
+
 ```
+```{r Part C.1 strong SNPs}
+strongSNPcount <- length(which(gwscan_2$abnormalBMD > 6))
+print(strongSNPcount)
+
+gwscan_QTL_cum <- gwscan_2 %>%
+  select(pos_cum, abnormalBMD, chr) %>%
+  filter(chr == 11, abnormalBMD > 6)
+
+pos_cum_min <- min(gwscan_QTL_cum$pos_cum)
+pos_cum_max <- max(gwscan_QTL_cum$pos_cum)
+QTL_size <- (pos_cum_max - pos_cum_min) / 10^6
+
+gwscan_QTL <- gwscan_2 %>%
+  select(pos, pos_cum, chr) %>%
+  filter(chr == 11, pos_cum == pos_cum_min | pos_cum == pos_cum_max)
+
+print(QTL_size)
+print(min(gwscan_QTL$pos))
+print(max(gwscan_QTL$pos))
+```
+```{r Part C.1 Col1a1}
+Col1a1_pos_min <- 94936224
+Col1a1_pos_max <- 94953042
+
+gwscan_Col1a1 <- gwscan_2 %>%
+  select(pos, abnormalBMD, chr) %>%
+  filter(chr == 11, pos > Col1a1_pos_min & pos < Col1a1_pos_max, abnormalBMD > 6)
+
+glimpse(gwscan_Col1a1)
+```
+
+
+* There are 334 SNPs associated with -log10(P) larger than 6. These SNPs are located within 2 distinct regions of the genome.
+* -log10(P) of 6 corresponds to the p-value of 0.000001
+* QTL with the strongest association signal is located in chromosome 11. The size of this locus is roughly 2.4 Mb and it contains ~70 genes.
+* The Col1a1 gene was not included in the count performed above. Maximum -log10(P) value in the region spanning this gene was equal to 4.58.
 
 
