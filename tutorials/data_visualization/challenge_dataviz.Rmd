@@ -95,6 +95,7 @@ plot6 <- ggplot(pheno2, aes_string(x = "FCbox", y = "AvToneD3")) +
 
 plot6
 ```
+
 **The distribution of AvToneD3 values isn't normal before using logit function. However transformation with logit yields distribution of values closer to normal. The type of apparatus used to perform the tone measurements seems to affect the results to some degree**
 
 
@@ -192,6 +193,8 @@ print(min(gwscan_QTL$pos))
 print(max(gwscan_QTL$pos))
 ```
 ```{r Part C.1 Col1a1}
+
+#From Genome UCSC
 Col1a1_pos_min <- 94936224
 Col1a1_pos_max <- 94953042
 
@@ -209,3 +212,38 @@ glimpse(gwscan_Col1a1)
 * The Col1a1 gene was not included in the count performed above. Maximum -log10(P) value in the region spanning this gene was equal to 4.58.
 
 
+```{r Part C.2}
+gwscan_2 %>%
+  select(id, abnormalBMD) %>%
+  filter(id == "rs29477109")
+
+gwscan_2
+
+geno <- read.csv("geno_rs29477109.csv", stringsAsFactors = F)
+
+pheno3 <- pheno
+pheno3$id <- as.numeric(pheno3$id)
+
+pheno_geno <- pheno3 %>%
+  left_join(geno, by = "id")
+
+pheno_geno$dosage <- round(pheno_geno$dosage, digits = 0)
+
+pheno_geno_2 <- pheno_geno %>%
+  mutate(
+    geno = ifelse(dosage == 0, "CC",
+    ifelse(dosage == 1, "CT",
+    ifelse(dosage == 2, "TT", NA))))
+
+pheno_geno_2$geno <- as.factor(pheno_geno_2$geno)
+
+ggplot(pheno_geno_2, aes(x = geno, y = BMD)) +
+  geom_boxplot() +
+  theme_cowplot() +
+  labs(
+    x = "Genotype",
+    y = "BMD"
+  )
+```
+
+**While there is no visible difference between BMD of CT and TT genotypes, the CC genotype presented BMD leaning toward higher values (higher 3rd quartile).** 
