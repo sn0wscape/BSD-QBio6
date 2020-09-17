@@ -39,7 +39,15 @@ nobel_nomin_count <- as.data.frame(table(nobel4$V2))
 ```
 
 ```{r 4}
-nominee_per_year <- as.data.frame(table(nobel$V1))
+
+nobel_in_field_per_year <- nobel %>%
+  group_by(V1, V2) %>%
+  summarise(no_rows = length(V2)) %>%
+  ungroup %>%
+  group_by(V1) %>%
+  summarise(mean = mean(no_rows))
+
+
 ```
 
 
