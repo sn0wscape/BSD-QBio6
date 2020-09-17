@@ -1,0 +1,28 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r load libraries, data}
+library(ggplot2)
+library(tidyverse)
+library(cowplot)
+
+flu <- read.csv("PreisMoat2014.csv", stringsAsFactors = F)
+```
+
+```{r}
+ggplot(flu, aes(x = GoogleFluTrends, y = WeeklyOutpatientVisitsforILI)) +
+  geom_point() +
+  theme_cowplot()
+
+pearson <- cor(x = flu$GoogleFluTrends, y = flu$WeeklyOutpatientVisitsforILI, method = "pearson")
+print(pearson)
+```
+
