@@ -1,0 +1,45 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r 1}
+library(tidyverse)
+nobel <- read.csv("nobel_nominations.csv", stringsAsFactors = F, header = F)
+nobel2 <- nobel %>%
+  filter(V1 == "Che") %>%
+  group_by(V3) %>%
+  summarize(n = n())
+```
+**Georges Urbain**
+
+```{r 2}
+nobel3 <- nobel %>%
+  select(V1, V3) %>%
+  distinct
+
+nobel_count <- as.data.frame(table(nobel3$V3))
+
+nobel_count <- nobel_count %>%
+  filter(Freq > 1)
+```
+
+```{r 3}
+nobel4 <- nobel %>%
+  select(V2, V3) %>%
+  distinct
+
+nobel_nomin_count <- as.data.frame(table(nobel4$V2))
+```
+
+```{r 4}
+nominee_per_year <- as.data.frame(table(nobel$V1))
+```
+
+
