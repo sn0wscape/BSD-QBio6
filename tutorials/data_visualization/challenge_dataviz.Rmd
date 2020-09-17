@@ -58,6 +58,7 @@ plot3 <- ggplot(pheno_ro, aes_string(x = "TA", y = "tibia")) +
 
 plot3
 
+#Print lm coefficient for comparison
 print(lm1)
 print(lm2)
 ```
@@ -140,10 +141,11 @@ gwscan_2 <- gwscan %>%
   select(-chr_len) %>%
   left_join(gwscan, ., by = 'chr') %>% # add this info to original df
             
-  # position of SNP in the cumkulative coordinates
+  # position of SNP in the cumulative coordinates
   arrange(chr,pos) %>%
   mutate(pos_cum = pos + start_cum)
 
+#Get x axis labels and breaks
 axis <- gwscan_2 %>%
   group_by(chr) %>%
   summarize(center = (max(pos_cum) + min(pos_cum) ) / 2 )
@@ -151,10 +153,13 @@ axis <- gwscan_2 %>%
 ```
 
 ```{r Part C.1 manhattan plot}
+
+#Generate scatter plot
 ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
   geom_point(aes(color = as.factor(chr), alpha = 0.75)) +
-  scale_color_manual(values = rep(c("dodgerblue4", "dodgerblue2"), 19)) +
+  scale_color_manual(values = rep(c("dodgerblue4", "dodgerblue2"), 19)) + #Color chromosomes by repeating 1st and 2nd color
   
+  #Modify theme
   scale_x_continuous(label = axis$chr, breaks = axis$center) +
   theme_cowplot() +
   theme( 
@@ -166,6 +171,7 @@ ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
       axis.ticks.x = element_blank(),
       axis.line.x = element_blank()
     ) +
+  
   labs(
     x = "Chromosome",
     y = "-log10(P)"
@@ -173,17 +179,21 @@ ggplot(gwscan_2, aes(x = pos_cum, y = abnormalBMD)) +
 
 ```
 ```{r Part C.1 strong SNPs}
+
+#Count SNPs with p-values > 6
 strongSNPcount <- length(which(gwscan_2$abnormalBMD > 6))
 print(strongSNPcount)
 
+#Determine location of the strongest QTL in the genome (based on cumulative position)
 gwscan_QTL_cum <- gwscan_2 %>%
   select(pos_cum, abnormalBMD, chr) %>%
   filter(chr == 11, abnormalBMD > 6)
 
 pos_cum_min <- min(gwscan_QTL_cum$pos_cum)
 pos_cum_max <- max(gwscan_QTL_cum$pos_cum)
-QTL_size <- (pos_cum_max - pos_cum_min) / 10^6
+QTL_size <- (pos_cum_max - pos_cum_min) / 10^6 #Calculate size of the QTL in Mb
 
+#Extract QTL position in chromosome 11 (relative to this chromosome)
 gwscan_QTL <- gwscan_2 %>%
   select(pos, pos_cum, chr) %>%
   filter(chr == 11, pos_cum == pos_cum_min | pos_cum == pos_cum_max)
@@ -198,6 +208,7 @@ print(max(gwscan_QTL$pos))
 Col1a1_pos_min <- 94936224
 Col1a1_pos_max <- 94953042
 
+#Filter dataset for SNPs located in chromosome 11 between start/end positions of Col1a1 gene with p-values > 6
 gwscan_Col1a1 <- gwscan_2 %>%
   select(pos, abnormalBMD, chr) %>%
   filter(chr == 11, pos > Col1a1_pos_min & pos < Col1a1_pos_max, abnormalBMD > 6)
@@ -213,6 +224,8 @@ glimpse(gwscan_Col1a1)
 
 
 ```{r Part C.2}
+
+#Demonstrate the p-value for rs29477109 SNP
 gwscan_2 %>%
   select(id, abnormalBMD) %>%
   filter(id == "rs29477109")
@@ -222,11 +235,13 @@ gwscan_2
 geno <- read.csv("geno_rs29477109.csv", stringsAsFactors = F)
 
 pheno3 <- pheno
-pheno3$id <- as.numeric(pheno3$id)
+pheno3$id <- as.numeric(pheno3$id) #Values in this column were stored as strings, which precluded joining of the tables. as.numeric() fixed it.
 
+#Joining pheno and geno tables using dplyr
 pheno_geno <- pheno3 %>%
   left_join(geno, by = "id")
 
+#Convert dosage column values to genotypes CC, CT, TT
 pheno_geno$dosage <- round(pheno_geno$dosage, digits = 0)
 
 pheno_geno_2 <- pheno_geno %>%
@@ -237,6 +252,7 @@ pheno_geno_2 <- pheno_geno %>%
 
 pheno_geno_2$geno <- as.factor(pheno_geno_2$geno)
 
+#Generating a boxplot
 ggplot(pheno_geno_2, aes(x = geno, y = BMD)) +
   geom_boxplot() +
   theme_cowplot() +
