@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r read data}
+library(utils)
+data <- read.csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", na.strings = "", fileEncoding = "UTF-8-BOM")
+```
+
+```{r model 1}
+#first letter to a numeric alphabetic position.
+data1 <- data[(data$dateRep == "11/08/2020"), ]
+CountryAb <- as.integer(as.factor(substr(data1$countriesAndTerritories, 1, 1)))
+
+#build a linear model for the relationship between Cumulative_number_for_14_days_of_COVID.19_cases_
+model1 <- lm(Cumulative_number_for_14_days_of_COVID.19_cases_per_100000 ~ CountryAb, data = data1)
+qplot(CountryAb, Cumulative_number_for_14_days_of_COVID.19_cases_per_100000, data = data1)
+summary(model1)
+```
+
+```{r model 2}
+data2 <- data[(data$dateRep == "11/09/2020"), ]
+CountryAb <- as.integer(as.factor(substr(data2$countriesAndTerritories, 2, 2)))
+
+model2 <- lm(Cumulative_number_for_14_days_of_COVID.19_cases_per_100000 ~ CountryAb, data = data2)
+summary(model2)
+
+```
+```{r model 3}
+library(tidyverse)
+library(ggplot2)
+data3 <- data
+data3$weekday_no <- as.numeric(strftime(as.Date(data3$dateRep, "%d/%m/%Y"), "%u"))
+
+data3_Thu <- data3 %>%
+  filter(weekday_no == 1, continentExp == "Asia")
+
+#CountryAb <- as.integer(as.factor(substr(data3$countriesAndTerritories, 2, 2)))
+
+model3 <- lm(deaths ~ day, data = data3_Thu)
+#qplot(day, cases, data = data3_Thu)
+summary(model3)
+
+```
+
+```{r model 4}
+
+data4 <- data[(data$dateRep == "05/05/2020"), ]
+CountryCode <- as.integer(as.factor(substr(data4$countryterritoryCode, 2, 2)))
+
+model4 <- lm(Cumulative_number_for_14_days_of_COVID.19_cases_per_100000 ~ CountryCode, data = data4)
+qplot(CountryCode, Cumulative_number_for_14_days_of_COVID.19_cases_per_100000, data = data4)
+summary(model4)
+
+```
+
+```{r model 5}
+
+data5 <- data
+data5$weekday_no <- as.numeric(strftime(as.Date(data5$dateRep, "%d/%m/%Y"), "%u"))
+
+data5_Poland <- data5 %>%
+  filter(countriesAndTerritories == "Poland")
+
+model5 <- lm(deaths ~ weekday_no, data = data5_Poland)
+summary(model5)
+
+```
+
+** There is a positive significant correlation (p = 0.0408) between the day of a week and number of deaths caused by COVID-19 in Poland. This correlation doesn't seem to occur for many of the other european countries, with focus on slavic countries and countries with a similar population - it seem to be accidential. In other words, in order to present this correlation, the country has been cherry-picked from the pool of other countries, that don't show any similar correlation. **
