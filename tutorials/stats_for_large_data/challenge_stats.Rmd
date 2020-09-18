@@ -63,15 +63,24 @@ summary(model4)
 
 ```{r model 5}
 
+library(utils)
+library(dplyr)
+
+#read in the dataset
+data <- read.csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", na.strings = "", fileEncoding = "UTF-8-BOM")
+
+#convert dates to weekdays in numeric format
 data5 <- data
 data5$weekday_no <- as.numeric(strftime(as.Date(data5$dateRep, "%d/%m/%Y"), "%u"))
 
+#Subset for Poland
 data5_Poland <- data5 %>%
   filter(countriesAndTerritories == "Poland")
 
+#fit a linear regression model
 model5 <- lm(deaths ~ weekday_no, data = data5_Poland)
 summary(model5)
 
 ```
 
-** There is a positive significant correlation (p = 0.0408) between the day of a week and number of deaths caused by COVID-19 in Poland. This correlation doesn't seem to occur for many of the other european countries, with focus on slavic countries and countries with a similar population - it seem to be accidential. In other words, in order to present this correlation, the country has been cherry-picked from the pool of other countries, that don't show any similar correlation. **
+** There is a positive significant correlation (p = 0.0408) between the day of a week and number of deaths caused by COVID-19 in Poland. This correlation doesn't seem to occur for many of the other european countries, with focus on slavic countries, countries with a similar population, as well as countries with similar ratings of anti-COVID response - it seem to be accidential. In other words, in order to obtain this correlation, the country has been cherry-picked from the pool of other countries, that don't show any similar correlation, and the relationship lacks plausible causality. **
